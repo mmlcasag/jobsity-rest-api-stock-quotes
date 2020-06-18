@@ -1,0 +1,35 @@
+{
+  "name": "jobsity-rest-api-stock-quotes",
+  "version": "1.0.0",
+  "description": "This application is an API with authentication and only one endpoint, which receives a ticker as an argument, and then gets stock quotes for that particular ticker from a remote address, parses it and returns the stock price to the caller application.",
+  "main": "app.js",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "csv-parser": "^2.3.3",
+    "express": "^4.17.1",
+    "jsonwebtoken": "^8.5.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mmlcasag/jobsity-rest-api-stock-quotes.git"
+  },
+  "keywords": [
+    "rest",
+    "api",
+    "jobsity",
+    "stock",
+    "quotes",
+    "nodejs"
+  ],
+  "author": "Márcio Luís Casagrande",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mmlcasag/jobsity-rest-api-stock-quotes/issues"
+  },
+  "homepage": "https://github.com/mmlcasag/jobsity-rest-api-stock-quotes#readme"
+}
