@@ -1,11 +1,13 @@
 const fs = require('fs');
 const https = require('https');
+const bcrypt = require('bcrypt');
 
 const jwt = require('jsonwebtoken');
 const csv = require('csv-parser');
 
 const authConfig = require('../config/auth.json');
 const stockConfig = require('../config/stock.json');
+const User = require('../models/user');
 
 module.exports.authenticate = (req, res, next) => {
     const { email, password } = req.body;
@@ -17,12 +19,31 @@ module.exports.authenticate = (req, res, next) => {
         return res.status(401).send({ error: true, message: 'Password not provided' });
     }
 
-    try {
-        const token = jwt.sign({ id: email }, authConfig.secret, { expiresIn: 86400 });
-        return res.status(200).send({ error: false, message: 'Success', token: token });
-    } catch (err) {
+    User
+    .findOne({ email: email })
+    .then(user => {
+        if (!user) {
+            return res.status(401).send({ error: true, message: 'Invalid e-mail or password' });
+        }
+
+        bcrypt
+        .compare(password, user.password)
+        .then(doMatch => {
+            if (doMatch) {
+                try {
+                    const token = jwt.sign({ id: email }, authConfig.secret, { expiresIn: 86400 });
+                    return res.status(200).send({ error: false, message: 'Success', token: token });
+                } catch (err) {
+                    return res.status(500).send({ error: true, message: 'Could not generate authentication token' });
+                }
+            } else {
+                return res.status(401).send({ error: true, message: 'Invalid e-mail or password' });
+            }
+        });
+    })
+    .catch(err => {
         return res.status(500).send({ error: true, message: 'Could not generate authentication token' });
-    }
+    });
 }
 
 module.exports.getStockQuote = (req, res, next) => {
