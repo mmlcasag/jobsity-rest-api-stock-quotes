@@ -20,26 +20,17 @@ module.exports.authenticate = (req, res, next) => {
     }
 
     User
-    .findOne({ email: email })
+    .findOne({ email: email, password: password })
     .then(user => {
         if (!user) {
             return res.status(401).send({ error: true, message: 'Invalid e-mail or password' });
         }
-
-        bcrypt
-        .compare(password, user.password)
-        .then(doMatch => {
-            if (doMatch) {
-                try {
-                    const token = jwt.sign({ id: email }, authConfig.secret, { expiresIn: 86400 });
-                    return res.status(200).send({ error: false, message: 'Success', token: token });
-                } catch (err) {
-                    return res.status(500).send({ error: true, message: 'Could not generate authentication token' });
-                }
-            } else {
-                return res.status(401).send({ error: true, message: 'Invalid e-mail or password' });
-            }
-        });
+        try {
+            const token = jwt.sign({ id: email }, authConfig.secret, { expiresIn: 86400 });
+            return res.status(200).send({ error: false, message: 'Success', token: token });
+        } catch (err) {
+            return res.status(500).send({ error: true, message: 'Could not generate authentication token' });
+        }
     })
     .catch(err => {
         return res.status(500).send({ error: true, message: 'Could not generate authentication token' });
@@ -72,7 +63,17 @@ module.exports.getStockQuote = (req, res, next) => {
                     })
                     .on('end', () => {
                         // returns the success message with the real-time stock quotes
-                        res.status(200).send({ error: false, message: results });
+                        const result = results[0];
+                        res.status(200).send({ error: false, message: {
+                            symbol: result.Symbol,
+                            date: result.Date,
+                            time: result.Time,
+                            open: result.Open,
+                            high: result.High,
+                            low: result.Low,
+                            close: result.Close,
+                            volume: result.Volume
+                        } });
                     });
             });
         });
