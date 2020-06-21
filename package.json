@@ -4,12 +4,10 @@
   "description": "This application is an API with authentication and only one endpoint, which receives a ticker as an argument, and then gets stock quotes for that particular ticker from a remote address, parses it and returns the stock price to the caller application.",
   "main": "app.js",
   "dependencies": {
-    "bcrypt": "^5.0.0",
     "body-parser": "^1.19.0",
     "csv-parser": "^2.3.3",
     "express": "^4.17.1",
-    "jsonwebtoken": "^8.5.1",
-    "mongoose": "^5.9.19"
+    "jsonwebtoken": "^8.5.1"
   },
   "devDependencies": {},
   "scripts": {

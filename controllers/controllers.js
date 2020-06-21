@@ -1,13 +1,11 @@
 const fs = require('fs');
 const https = require('https');
-const bcrypt = require('bcrypt');
 
 const jwt = require('jsonwebtoken');
 const csv = require('csv-parser');
 
 const authConfig = require('../config/auth.json');
 const stockConfig = require('../config/stock.json');
-const User = require('../models/user');
 
 module.exports.authenticate = (req, res, next) => {
     const { client, secret } = req.body;
