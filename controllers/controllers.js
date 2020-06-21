@@ -10,35 +10,31 @@ const stockConfig = require('../config/stock.json');
 const User = require('../models/user');
 
 module.exports.authenticate = (req, res, next) => {
-    const { email, password } = req.body;
+    const { client, secret } = req.body;
 
-    if (!email) {
-        return res.status(401).send({ error: true, message: 'E-mail not provided' });
+    if (!client) {
+        return res.status(401).send({ error: true, message: 'Client not provided' });
     }
-    if (!password) {
-        return res.status(401).send({ error: true, message: 'Password not provided' });
+    if (!secret) {
+        return res.status(401).send({ error: true, message: 'Secret not provided' });
     }
 
-    User
-    .findOne({ email: email, password: password })
-    .then(user => {
-        if (!user) {
-            return res.status(401).send({ error: true, message: 'Invalid e-mail or password' });
-        }
-        try {
-            const token = jwt.sign({ id: email }, authConfig.secret, { expiresIn: 86400 });
-            return res.status(200).send({ error: false, message: 'Success', token: token });
-        } catch (err) {
-            return res.status(500).send({ error: true, message: 'Could not generate authentication token' });
-        }
-    })
-    .catch(err => {
+    if (client !== authConfig.client) {
+        return res.status(401).send({ error: true, message: 'Client does not have permission to authenticate' });
+    }
+    if (secret !== authConfig.secret) {
+        return res.status(401).send({ error: true, message: 'Invalid secret key' });
+    }
+    
+    try {
+        const token = jwt.sign({ id: client }, authConfig.secret, { expiresIn: 86400 });
+        return res.status(200).send({ error: false, message: 'Success', token: token });
+    } catch (err) {
         return res.status(500).send({ error: true, message: 'Could not generate authentication token' });
-    });
+    }
 }
 
 module.exports.getStockQuote = (req, res, next) => {
-    const user = req.authenticatedUser;
     const { ticker } = req.body;
     
     if (!ticker) {
@@ -64,6 +60,11 @@ module.exports.getStockQuote = (req, res, next) => {
                     .on('end', () => {
                         // returns the success message with the real-time stock quotes
                         const result = results[0];
+                        
+                        if (result.Close === 'N/D') {
+                            return res.status(500).send({ error: true, message: 'Could not get real-time stock information' });
+                        }
+
                         res.status(200).send({ error: false, message: {
                             symbol: result.Symbol,
                             date: result.Date,
